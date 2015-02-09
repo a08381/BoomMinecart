@@ -5,6 +5,13 @@
  */
 package tk.a08381;
 
+import org.bukkit.Bukkit;
+import org.bukkit.configuration.InvalidConfigurationException;
+import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.event.HandlerList;
+import org.bukkit.event.Listener;
+import org.bukkit.plugin.java.JavaPlugin;
+
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -15,17 +22,6 @@ import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.bukkit.Bukkit;
-import org.bukkit.configuration.InvalidConfigurationException;
-import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.event.HandlerList;
-import org.bukkit.event.Listener;
-import org.bukkit.event.entity.CreatureSpawnEvent;
-import org.bukkit.event.inventory.InventoryMoveItemEvent;
-import org.bukkit.event.player.AsyncPlayerChatEvent;
-//import org.bukkit.event.player.PlayerCommandPreprocessEvent;
-import org.bukkit.plugin.java.JavaPlugin;
-
 /**
  *
  * @author a08381
@@ -35,6 +31,7 @@ public class BoomMinecart extends JavaPlugin  {
     private static Listener hmboom = new HMBOOM();
     public static boolean isLockette = false;
     public static YamlConfiguration config = new YamlConfiguration();
+    public static boolean bonebugfix = false;
 
     public void onEnable() {
         try {
@@ -87,8 +84,10 @@ public class BoomMinecart extends JavaPlugin  {
             config.set("Boom.power", config.getDouble("Boom.power", 8));
             config.set("Boom.break", config.getBoolean("Boom.break", false));
             config.set("Nearby.around", config.getInt("Nearby.around", 10));
-            config.set("NMobLimit.world", config.getList("MobLimit.world", Arrays.asList("world_nether")));
+            config.set("NMobLimit.world", config.getList("NMobLimit.world", Arrays.asList("world_nether")));
             config.set("NMobLimit.hight", config.getDouble("NMobLimit.hight", 128));
+            bonebugfix = config.getBoolean("tools.BoneBugFix", false);
+            config.set("tool.BoneBugFix", bonebugfix);
             config.save(file);
         } catch (IOException | InvalidConfigurationException ex) {
             Logger.getLogger(BoomMinecart.class.getName()).log(Level.SEVERE, null, ex);
