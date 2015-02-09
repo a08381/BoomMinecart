@@ -18,6 +18,7 @@ import java.util.logging.Logger;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Effect;
+import org.bukkit.TreeType;
 import org.bukkit.World;
 import org.bukkit.block.BlockState;
 import org.bukkit.configuration.InvalidConfigurationException;
@@ -171,9 +172,30 @@ public class HMBOOM implements Listener  {
                 && event.getItem().getDurability() == 15
                 && event.getClickedBlock().getTypeId() == 6
                 && event.getAction() == Action.RIGHT_CLICK_BLOCK) {
-            event.getItem().setAmount(event.getItem().getAmount() - 1);
-            event.getClickedBlock().getWorld().playEffect(event.getClickedBlock().getLocation(), Effect.valueOf(""));
             event.setCancelled(true);
+            event.getItem().setAmount(event.getItem().getAmount() - 1);
+            TreeType tree = null;
+            switch(event.getItem().getDurability()){
+                case 0:
+                    tree = TreeType.TREE;
+                    break;
+                case 1:
+                    tree = TreeType.SWAMP;
+                    break;
+                case 2:
+                    tree = TreeType.BIRCH;
+                    break;
+                case 3:
+                    tree = TreeType.JUNGLE;
+                    break;
+                case 4:
+                    tree = TreeType.ACACIA;
+                    break;
+                case 5:
+                    tree = TreeType.DARK_OAK;
+                    break;
+            }
+            event.getClickedBlock().getWorld().generateTree(event.getClickedBlock().getLocation(), tree);
         }
     }
     /*
