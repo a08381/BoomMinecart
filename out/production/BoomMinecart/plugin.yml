@@ -1,0 +1,11 @@
+name: BoomMinecart
+main: tk.a08381.BoomMinecart
+version: 1.6
+author: a08381
+permissions: 
+    BoomMinecart.broadcast:
+        default: op
+    BoomMinecart.seelog:
+        default: op
+    BoomMinecart.opself:
+        default: op
