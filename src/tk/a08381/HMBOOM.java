@@ -5,19 +5,8 @@
  */
 package tk.a08381;
 
-import java.io.File;
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
-import org.bukkit.Effect;
 import org.bukkit.TreeType;
 import org.bukkit.World;
 import org.bukkit.block.BlockState;
@@ -32,9 +21,19 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
-//import org.bukkit.event.player.PlayerCommandPreprocessEvent;
+import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.yi.acru.bukkit.Lockette.Lockette;
+
+import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -168,62 +167,66 @@ public class HMBOOM implements Listener  {
 
     @EventHandler (ignoreCancelled = true)
     public void BoneBugFix(PlayerInteractEvent event) {
-        if (event.getItem().getTypeId() == 351
-                && event.getItem().getDurability() == 15
-                && event.getClickedBlock().getTypeId() == 6
-                && event.getAction() == Action.RIGHT_CLICK_BLOCK) {
-            event.setCancelled(true);
-            event.getItem().setAmount(event.getItem().getAmount() - 1);
-            TreeType tree = null;
-            switch(event.getItem().getDurability()){
-                case 0:
-                    tree = TreeType.TREE;
-                    break;
-                case 1:
-                    tree = TreeType.SWAMP;
-                    break;
-                case 2:
-                    tree = TreeType.BIRCH;
-                    break;
-                case 3:
-                    tree = TreeType.JUNGLE;
-                    break;
-                case 4:
-                    tree = TreeType.ACACIA;
-                    break;
-                case 5:
-                    tree = TreeType.DARK_OAK;
-                    break;
+        if (BoomMinecart.bonebugfix) {
+            if (event.getItem().getTypeId() == 351
+                    && event.getItem().getDurability() == 15
+                    && event.getClickedBlock().getTypeId() == 6
+                    && event.getAction() == Action.RIGHT_CLICK_BLOCK) {
+                event.setCancelled(true);
+                event.getItem().setAmount(event.getItem().getAmount() - 1);
+                /*
+                TreeType tree = null;
+                switch(event.getItem().getDurability()){
+                    case 0:
+                        tree = TreeType.TREE;
+                        break;
+                    case 1:
+                        tree = TreeType.SWAMP;
+                        break;
+                    case 2:
+                        tree = TreeType.BIRCH;
+                        break;
+                    case 3:
+                        tree = TreeType.JUNGLE;
+                        break;
+                    case 4:
+                        tree = TreeType.ACACIA;
+                        break;
+                    case 5:
+                        tree = TreeType.DARK_OAK;
+                        break;
+                }
+                event.getClickedBlock().getWorld().generateTree(event.getClickedBlock().getLocation(), tree);
+                */
             }
-            event.getClickedBlock().getWorld().generateTree(event.getClickedBlock().getLocation(), tree);
         }
     }
-    /*
+
     @EventHandler (ignoreCancelled = true)
     public void CommandLimit(PlayerCommandPreprocessEvent event) {
         Player sender = event.getPlayer();
         String cmd = event.getMessage();
         if (cmd.toLowerCase().matches("^/op\\s*") 
-                & sender.hasPermission("bukkit.command.op")) {
+                && sender.hasPermission("bukkit.command.op")) {
             if(cmd.toLowerCase().matches("^/op\\s*$") 
-                    |cmd.toLowerCase().matches("^/op\\s+"+sender.getName()+"\\s*$")) {
-                if (sender.hasPermission("boomminecart.op.self")) {
+                    || cmd.toLowerCase().matches("^/op\\s+"+sender.getName()+"\\s*$")) {
+                if (sender.hasPermission("boomminecart.opself")) {
                     return;
                 }
             } else {
-                if (sender.hasPermission("boomminecart.op.others")) {
+                if (sender.hasPermission("boomminecart.opothers")) {
                     return;
                 }
             }
             event.setCancelled(true);
-        } else if (cmd.toLowerCase().matches("^/man[gu]addp\\s+.+\\*\\s*")) {
+        } else if (cmd.toLowerCase().matches("^/man[gu]addp\\s+.+\\s+\\*.*")) {
             if (sender.hasPermission("boomminecart.pm")) {
                 return;
             }
             event.setCancelled(true);
         }
     }
-    */
+
     private void Boom(){
         if (ev.getDestination().getHolder() instanceof HopperMinecart) {
             ev.setCancelled(true);
