@@ -5,20 +5,22 @@
  */
 package tk.a08381;
 
+import com.worldcretornica.plotme.Plot;
+import com.worldcretornica.plotme.PlotManager;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
-import org.bukkit.TreeType;
 import org.bukkit.World;
 import org.bukkit.block.BlockState;
+import org.bukkit.block.DoubleChest;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
 import org.bukkit.entity.minecart.HopperMinecart;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.CreatureSpawnEvent;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
@@ -51,7 +53,13 @@ public class HMBOOM implements Listener  {
             if(event.getSource().getHolder() instanceof BlockState){
                 BlockState block = (BlockState) event.getSource().getHolder();
                 if(Lockette.isProtected(block.getBlock())){
-                    ev=event;
+                    ev = event;
+                    Boom();
+                }
+            } else if (event.getSource().getHolder() instanceof DoubleChest) {
+                DoubleChest block = (DoubleChest) event.getSource().getHolder();
+                if(Lockette.isProtected(block.getWorld().getBlockAt(block.getLocation()))) {
+                    ev = event;
                     Boom();
                 }
             }
@@ -158,8 +166,8 @@ public class HMBOOM implements Listener  {
     
     @EventHandler (ignoreCancelled = true)
     public void SpawnLimit(CreatureSpawnEvent event) {
-        if (BoomMinecart.config.getList("NMobLimit.world").contains(event.getEntity().getWorld().getName())) {
-            if (event.getEntity().getLocation().getY() >= BoomMinecart.config.getDouble("NMobLimit.hight")){
+        if (BoomMinecart.config.getList("Server.DEADWAR.NMobLimit.world").contains(event.getEntity().getWorld().getName())) {
+            if (event.getEntity().getLocation().getY() >= BoomMinecart.config.getDouble("Server.DEADWAR.NMobLimit.hight")){
                 event.setCancelled(true);
             }
         }
@@ -203,9 +211,32 @@ public class HMBOOM implements Listener  {
     }
 
     @EventHandler (ignoreCancelled = true)
+    public void PlotAnimalsProtect(EntityDamageByEntityEvent event) {
+        if ((event.getEntity() instanceof Animals || event.getEntity() instanceof Golem) && PlotManager.isPlotWorld(event.getEntity().getWorld())) {
+            if (event.getDamager() instanceof Player) {
+                Player player = (Player) event.getDamager();
+                Plot plot = PlotManager.getPlotById(event.getEntity().getLocation());
+                if (plot.getOwner() == player.getName() || plot.isAllowed(player.getName()) || player.hasPermission("BoomMinecart.PlotProtection")) {
+                    return;
+                }
+                event.setCancelled(true);
+            }
+        } else if (event.getDamager() instanceof Arrow) {
+            Arrow arrow = (Arrow) event.getDamager();
+            if (arrow.getShooter() instanceof Player) {
+                Player player = (Player) arrow.getShooter();
+                Plot plot = PlotManager.getPlotById(event.getEntity().getLocation());
+                if (plot.getOwner() == player.getName() || plot.isAllowed(player.getName()) || player.hasPermission("BoomMinecart.PlotProtection")) {
+                    return;
+                }
+            }
+                event.setCancelled(true);
+        }
+    }
+
+    @EventHandler (ignoreCancelled = true)
     public void CommandLimit(PlayerCommandPreprocessEvent event) {
-        Player sender = event.getPlayer();
-        String cmd = event.getMessage();
+        /*
         if (cmd.toLowerCase().matches("^/op\\s*") 
                 && sender.hasPermission("bukkit.command.op")) {
             if(cmd.toLowerCase().matches("^/op\\s*$") 
@@ -224,6 +255,13 @@ public class HMBOOM implements Listener  {
                 return;
             }
             event.setCancelled(true);
+        } else
+        */
+        if (BoomMinecart.config.getBoolean("Server.DEADWAR.CommandFix")) {
+            String cmd = event.getMessage();
+            if (cmd.toLowerCase().startsWith("/p ")) {
+                event.setCancelled(event.getPlayer().performCommand("plotme " + cmd.toLowerCase().substring(3, cmd.length())));
+            }
         }
     }
 

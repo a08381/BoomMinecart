@@ -84,10 +84,12 @@ public class BoomMinecart extends JavaPlugin  {
             config.set("Boom.power", config.getDouble("Boom.power", 8));
             config.set("Boom.break", config.getBoolean("Boom.break", false));
             config.set("Nearby.around", config.getInt("Nearby.around", 10));
-            config.set("NMobLimit.world", config.getList("NMobLimit.world", Arrays.asList("world_nether")));
-            config.set("NMobLimit.hight", config.getDouble("NMobLimit.hight", 128));
-            bonebugfix = config.getBoolean("tools.BoneBugFix", false);
-            config.set("tool.BoneBugFix", bonebugfix);
+            config.set("Server.DEADWAR.NMobLimit.world", config.getList("Server.DEADWAR.NMobLimit.world", Arrays.asList("world_nether")));
+            config.set("Server.DEADWAR.NMobLimit.hight", config.getDouble("Server.DEADWAR.NMobLimit.hight", 128));
+            config.set("Server.DEADWAR.CommandFix", config.getBoolean("Server.DEADWAR.CommandFix", true));
+            config.set("Server.DEADWAR.ProtectPlotAnimals", config.getBoolean("Server.DEADWAR.ProtectPlotAnimals", true));
+            bonebugfix = config.getBoolean("Server.DEADWAR.tools.BoneBugFix", false);
+            config.set("Server.DEADWAR.tool.BoneBugFix", bonebugfix);
             config.save(file);
         } catch (IOException | InvalidConfigurationException ex) {
             Logger.getLogger(BoomMinecart.class.getName()).log(Level.SEVERE, null, ex);
