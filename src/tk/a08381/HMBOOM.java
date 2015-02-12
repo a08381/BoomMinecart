@@ -216,21 +216,25 @@ public class HMBOOM implements Listener  {
             if (event.getDamager() instanceof Player) {
                 Player player = (Player) event.getDamager();
                 Plot plot = PlotManager.getPlotById(event.getEntity().getLocation());
-                if (plot.getOwner() == player.getName() || plot.isAllowed(player.getName()) || player.hasPermission("BoomMinecart.PlotProtection")) {
-                    return;
+                if (plot != null) {
+                    if (plot.getOwner() == player.getName() || plot.isAllowed(player.getName()) || player.hasPermission("BoomMinecart.PlotProtection")) {
+                        return;
+                    }
+                    event.setCancelled(true);
                 }
-                event.setCancelled(true);
             }
         } else if (event.getDamager() instanceof Arrow) {
             Arrow arrow = (Arrow) event.getDamager();
             if (arrow.getShooter() instanceof Player) {
                 Player player = (Player) arrow.getShooter();
                 Plot plot = PlotManager.getPlotById(event.getEntity().getLocation());
-                if (plot.getOwner() == player.getName() || plot.isAllowed(player.getName()) || player.hasPermission("BoomMinecart.PlotProtection")) {
-                    return;
+                if (plot != null) {
+                    if (plot.getOwner() == player.getName() || plot.isAllowed(player.getName()) || player.hasPermission("BoomMinecart.PlotProtection")) {
+                        return;
+                    }
+                    event.setCancelled(true);
                 }
             }
-                event.setCancelled(true);
         }
     }
 
