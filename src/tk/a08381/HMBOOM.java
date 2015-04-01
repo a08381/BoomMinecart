@@ -9,6 +9,7 @@ import com.worldcretornica.plotme.Plot;
 import com.worldcretornica.plotme.PlotManager;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.DoubleChest;
@@ -21,6 +22,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityInteractEvent;
 import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
@@ -49,23 +51,25 @@ public class HMBOOM implements Listener  {
 
     @EventHandler (ignoreCancelled = true)
     public void HopperMining(InventoryMoveItemEvent event) {
-        if(BoomMinecart.isLockette){
-            if(event.getSource().getHolder() instanceof BlockState){
-                BlockState block = (BlockState) event.getSource().getHolder();
-                if(Lockette.isProtected(block.getBlock())){
-                    ev = event;
-                    Boom();
+        if (BoomMinecart.config.getBoolean("Boom.enable")) {
+            if (BoomMinecart.isLockette) {
+                if (event.getSource().getHolder() instanceof BlockState) {
+                    BlockState block = (BlockState) event.getSource().getHolder();
+                    if (Lockette.isProtected(block.getBlock())) {
+                        ev = event;
+                        Boom();
+                    }
+                } else if (event.getSource().getHolder() instanceof DoubleChest) {
+                    DoubleChest block = (DoubleChest) event.getSource().getHolder();
+                    if (Lockette.isProtected(block.getWorld().getBlockAt(block.getLocation()))) {
+                        ev = event;
+                        Boom();
+                    }
                 }
-            } else if (event.getSource().getHolder() instanceof DoubleChest) {
-                DoubleChest block = (DoubleChest) event.getSource().getHolder();
-                if(Lockette.isProtected(block.getWorld().getBlockAt(block.getLocation()))) {
-                    ev = event;
-                    Boom();
-                }
+            } else {
+                ev = event;
+                Boom();
             }
-        } else {
-            ev = event;
-            Boom();
         }
     }
     
@@ -172,69 +176,76 @@ public class HMBOOM implements Listener  {
             }
         }
     }
-
+/*
     @EventHandler (ignoreCancelled = true)
     public void BoneBugFix(PlayerInteractEvent event) {
         if (BoomMinecart.bonebugfix) {
-            if (event.getItem().getTypeId() == 351
-                    && event.getItem().getDurability() == 15
-                    && event.getClickedBlock().getTypeId() == 6
+            if (event.getItem().getType() == Material.INK_SACK
+                    && event.getClickedBlock().getType() == Material.SAPLING
                     && event.getAction() == Action.RIGHT_CLICK_BLOCK) {
-                event.setCancelled(true);
+                event.getClickedBlock().
                 event.getItem().setAmount(event.getItem().getAmount() - 1);
-                /*
-                TreeType tree = null;
-                switch(event.getItem().getDurability()){
-                    case 0:
-                        tree = TreeType.TREE;
-                        break;
-                    case 1:
-                        tree = TreeType.SWAMP;
-                        break;
-                    case 2:
-                        tree = TreeType.BIRCH;
-                        break;
-                    case 3:
-                        tree = TreeType.JUNGLE;
-                        break;
-                    case 4:
-                        tree = TreeType.ACACIA;
-                        break;
-                    case 5:
-                        tree = TreeType.DARK_OAK;
-                        break;
-                }
                 event.getClickedBlock().getWorld().generateTree(event.getClickedBlock().getLocation(), tree);
-                */
+            }
+        }
+    }
+*/
+    @EventHandler (ignoreCancelled = true)
+    public void PlotAnimalsProtect(EntityDamageByEntityEvent event) {
+        if (BoomMinecart.config.getBoolean("Server.DEADWAR.PlotMe.ProtectAnimals.enable")) {
+            if (
+                    (event.getEntity() instanceof Animals || event.getEntity() instanceof Golem)
+                            && PlotManager.isPlotWorld(event.getEntity().getWorld())) {
+                if (event.getDamager() instanceof Player) {
+                    Player player = (Player) event.getDamager();
+                    Plot plot = PlotManager.getPlotById(event.getEntity().getLocation());
+                    if (plot != null) {
+                        if (plot.getOwner() == player.getName()
+                                || plot.isAllowed(player.getName())
+                                || player.hasPermission("BoomMinecart.PlotProtection")) {
+                            return;
+                        }
+                        event.setCancelled(true);
+                    }
+                } else if (event.getDamager() instanceof Arrow) {
+                    Arrow arrow = (Arrow) event.getDamager();
+                    if (arrow.getShooter() instanceof Player) {
+                        Player player = (Player) arrow.getShooter();
+                        Plot plot = PlotManager.getPlotById(event.getEntity().getLocation());
+                        if (plot != null) {
+                            if (plot.getOwner() == player.getName()
+                                    || plot.isAllowed(player.getName())
+                                    || player.hasPermission("BoomMinecart.PlotProtection")) {
+                                return;
+                            }
+                            if (!BoomMinecart.config.getBoolean("Server.DEADWAR.PlotMe.ProtectAnimals.ProtectRoad"))
+                                event.setCancelled(true);
+                        }
+                        if (BoomMinecart.config.getBoolean("Server.DEADWAR.PlotMe.ProtectAnimals.ProtectRoad"))
+                            event.setCancelled(true);
+                    }
+                }
             }
         }
     }
 
     @EventHandler (ignoreCancelled = true)
-    public void PlotAnimalsProtect(EntityDamageByEntityEvent event) {
-        if ((event.getEntity() instanceof Animals || event.getEntity() instanceof Golem) && PlotManager.isPlotWorld(event.getEntity().getWorld())) {
-            if (event.getDamager() instanceof Player) {
-                Player player = (Player) event.getDamager();
-                Plot plot = PlotManager.getPlotById(event.getEntity().getLocation());
-                if (plot != null) {
-                    if (plot.getOwner() == player.getName() || plot.isAllowed(player.getName()) || player.hasPermission("BoomMinecart.PlotProtection")) {
-                        return;
-                    }
-                    event.setCancelled(true);
-                }
-            }
-        } else if (event.getDamager() instanceof Arrow) {
-            Arrow arrow = (Arrow) event.getDamager();
-            if (arrow.getShooter() instanceof Player) {
-                Player player = (Player) arrow.getShooter();
-                Plot plot = PlotManager.getPlotById(event.getEntity().getLocation());
-                if (plot != null) {
-                    if (plot.getOwner() == player.getName() || plot.isAllowed(player.getName()) || player.hasPermission("BoomMinecart.PlotProtection")) {
-                        return;
-                    }
-                    event.setCancelled(true);
-                }
-            }
+    public void SoilChangeEvent (PlayerInteractEvent event) {
+        if (BoomMinecart.config.getBoolean("Server.DEADWAR.PlotMe.ProtectSoil")) {
+            if (event.getClickedBlock().getType() == Material.SOIL
+                    && event.getAction() == Action.PHYSICAL
+                    && PlotManager.isPlotWorld(event.getPlayer().getWorld()))
+                event.setCancelled(true);
+        }
+    }
+
+    @EventHandler (ignoreCancelled = true)
+    public void SoilChangeEvent (EntityInteractEvent event) {
+        if (BoomMinecart.config.getBoolean("Server.DEADWAR.PlotMe.ProtectSoil")) {
+            if (event.getBlock().getType() == Material.SOIL
+                    && event.getEntityType() != EntityType.PLAYER
+                    && PlotManager.isPlotWorld(event.getEntity().getWorld()))
+                event.setCancelled(true);
         }
     }
 
@@ -272,18 +283,19 @@ public class HMBOOM implements Listener  {
     private void Boom(){
         if (ev.getDestination().getHolder() instanceof HopperMinecart) {
             ev.setCancelled(true);
-            if (entity != (HopperMinecart) ev.getDestination().getHolder()){
+            if (entity != (HopperMinecart) ev.getDestination().getHolder()) {
                 entity = (HopperMinecart) ev.getDestination().getHolder();
-                double x,y,z;
-                x=entity.getLocation().getX();
-                y=entity.getLocation().getY();
-                z=entity.getLocation().getZ();
+                double x, y, z;
+                x = entity.getLocation().getX();
+                y = entity.getLocation().getY();
+                z = entity.getLocation().getZ();
                 World world = entity.getWorld();
                 Double ar = BoomMinecart.config.getDouble("Nearby.around");
                 List<Entity> entities = entity.getNearbyEntities(ar, ar, ar);
                 entity.remove();
                 int power = BoomMinecart.config.getInt("Boom.power");
-                if (power >= 1) world.createExplosion(x,y,z,power, false,BoomMinecart.config.getBoolean("Boom.break"));
+                if (power >= 1)
+                    world.createExplosion(x, y, z, power, false, BoomMinecart.config.getBoolean("Boom.break"));
                 Bukkit.broadcast(
                         String.format(
                                 "§a[爆破小分队]§6成功炸毁一台漏斗矿车于§d【%1$s， %2$d， %3$d， %4$d】",
@@ -294,8 +306,8 @@ public class HMBOOM implements Listener  {
                         ),
                         "BoomMinecart.broadcast"
                 );
-                File file = new File(Bukkit.getPluginManager().getPlugin("BoomMinecart").getDataFolder(), "/"+time.format(new Date())+".yml");
-                if(!file.exists()) {
+                File file = new File(Bukkit.getPluginManager().getPlugin("BoomMinecart").getDataFolder(), "/" + time.format(new Date()) + ".yml");
+                if (!file.exists()) {
                     try {
                         file.createNewFile();
                     } catch (IOException ex) {

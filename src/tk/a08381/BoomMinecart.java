@@ -31,7 +31,7 @@ public class BoomMinecart extends JavaPlugin  {
     private static Listener hmboom = new HMBOOM();
     public static boolean isLockette = false;
     public static YamlConfiguration config = new YamlConfiguration();
-    public static boolean bonebugfix = false;
+    //public static boolean bonebugfix = false;
 
     public void onEnable() {
         try {
@@ -52,11 +52,7 @@ public class BoomMinecart extends JavaPlugin  {
                 fos.close();
                 bis.close();
             }
-        } catch (MalformedURLException ex) {
-            Logger.getLogger(BoomMinecart.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
-            Logger.getLogger(BoomMinecart.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InvalidConfigurationException ex) {
+        } catch (InvalidConfigurationException | IOException ex) {
             Logger.getLogger(BoomMinecart.class.getName()).log(Level.SEVERE, null, ex);
         }
         if(Bukkit.getPluginManager().getPlugin("Lockette") != null){
@@ -81,15 +77,16 @@ public class BoomMinecart extends JavaPlugin  {
         }
         try {
             config.load(file);
+            config.set("Boom.enable", config.getBoolean("Boom.enable", true));
             config.set("Boom.power", config.getDouble("Boom.power", 8));
             config.set("Boom.break", config.getBoolean("Boom.break", false));
             config.set("Nearby.around", config.getInt("Nearby.around", 10));
             config.set("Server.DEADWAR.NMobLimit.world", config.getList("Server.DEADWAR.NMobLimit.world", Arrays.asList("world_nether")));
             config.set("Server.DEADWAR.NMobLimit.hight", config.getDouble("Server.DEADWAR.NMobLimit.hight", 128));
             config.set("Server.DEADWAR.CommandFix", config.getBoolean("Server.DEADWAR.CommandFix", true));
-            config.set("Server.DEADWAR.ProtectPlotAnimals", config.getBoolean("Server.DEADWAR.ProtectPlotAnimals", true));
-            bonebugfix = config.getBoolean("Server.DEADWAR.tools.BoneBugFix", false);
-            config.set("Server.DEADWAR.tool.BoneBugFix", bonebugfix);
+            config.set("Server.DEADWAR.PlotMe.ProtectAnimals.enable", config.getBoolean("Server.DEADWAR.PlotMe.ProtectAnimals.enable", true));
+            config.set("Server.DEADWAR.PlotMe.ProtectAnimals.ProtectRoad", config.getBoolean("Server.DEADWAR.PlotMe.ProtectAnimals.ProtectRoad", true));
+            config.set("Server.DEADWAR.PlotMe.ProtectSoil", config.getBoolean("Server.DEADWAR.PlotMe.ProtectSoil", true));
             config.save(file);
         } catch (IOException | InvalidConfigurationException ex) {
             Logger.getLogger(BoomMinecart.class.getName()).log(Level.SEVERE, null, ex);
